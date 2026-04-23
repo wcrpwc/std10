@@ -53,7 +53,7 @@ weight = get_physic_getepreview(1, text)  # ✅ ไม่ใส่ ""
 
 print(f"Physics Gate Weight review: {weight}/10.0")
 
-# การสร้าง json 
+# การสร้าง json s
 import json
 from datetime import datetime
 
