@@ -1,4 +1,5 @@
 # กำหนดรูปแบบคำศัพท์
+##
 import re
 
 VIOLATION_KEYWORD = ["ละเมิด","ปลอมแปลง","เลียนแบบ","ทำซ้ำ","ดัดแปลง"]
@@ -35,3 +36,87 @@ text_with_context = "ละเมิดลิขสิทธิ์ตามม�
 conf, sig = cal_confidence(text_with_context, 2)
 print(f"Confidence: {conf: 2f}")
 print(f"Signals: {sig}")
+
+# กำหนดรูปแบบคำศัพท์
+import re
+
+VIOLATION_KEYWORD = ["ละเมิด","ปลอมแปลง","เลียนแบบ","ทำซ้ำ","ดัดแปลง"]
+PATENT_KEYWORD = ["สิทธิบัตร","การประดิษฐ์","ผังภูมิวงจร"]
+COPYRIGHT_KEYWORD = ["ลิขสิทธิ์","วรรณกรรม","ศิลปกรรม","ดนตรีกรรม"]
+
+def detect_category(text):
+    # ใช้ Regex
+    is_patent = any(re.search(k,text)  for k in PATENT_KEYWORD)
+    is_violation = any(re.search(k,text)  for k in VIOLATION_KEYWORD)
+    is_copyright = any(re.search(k,text)  for k in COPYRIGHT_KEYWORD)
+    if is_violation:
+        if is_patent: return 1
+        if is_copyright: return 2
+    return 0 
+# ทดสอบรัน
+sample = "พบการทำซ้ำวรรณกรรมโดยไม่ได้รับอนุญาต"
+# print(f"Text : {sample}")
+# print(f"Predicted Class : {detect_category(sample)}")
+
+# Context-aware Confidence
+def cal_confidence(text, predicted_class):
+    base_conf = 0.70
+    signals = []
+    if "มาตรา" in text or "พ.ร.บ." in text:
+        base_conf += 0.15
+        signals.append("statotury_ref")
+    if "คำพิพากษา" in text :
+        base_conf += 0.10
+        signals.append("precedent_ref")
+    return min(base_conf,0.99), signals
+# ทดสอบรัน
+text_with_context = "ละเมิดลิขสิทธิ์ตามมาตรา 27 แห่ง พ.ร.บ. ลิขสิทธิ์ "
+conf, sig = cal_confidence(text_with_context, 2)
+print(f"Confidence: {conf: 2f}")
+print(f"Signals: {sig}")
+
+#การลำดับศัพท์ของข้อมูล เพื่อหานํ้าหนักของข้อมูล
+
+def get_physic_getepreview(predicted_class, text):
+    # 0: none, 1: Patent (high complexity), 2: copyright (medium complexity)
+    weights = {0: 1, 1: 8.5, 2: 6.5}    
+    base_weight = weights.get(predicted_class, 1.0)
+    # ปรับน้ำหนักตาม keyword
+    if "ร้ายแรง" in text or "จำนวนมาก" in text:
+        base_weight = min(base_weight + 1.0, 10)
+    return base_weight  # ✅ ต้องมีเสมอ
+
+# run program
+text = "การละเมิดสิทธิบัตรรายใหญ่"
+weight = get_physic_getepreview(1, text)  # ✅ ไม่ใส่ ""
+
+print(f"Physics Gate Weight review: {weight}/10.0")
+
+# การสร้าง json 
+import json
+from datetime import datetime
+
+def create_json_entry(doc_id, text):
+    label = detect_category(text)
+    conf, signals = cal_confidence(text,label)
+    weight - get_physic_getepreview(label,text)
+    entry = {
+        "id" : f"LAW-{doc_id:04d}",
+        "text" : text,
+        "label": label,
+        "metadata":{
+            "confidence": conf,
+            "context-signals" : signals,
+            "physic_gate_weight": weight,
+            "processed_at" : datetime.now().isoformat(),
+            "require_expert_review" : conf < 0.85 
+        } 
+    }
+    
+    return entry
+
+# รัน code แสดงตัวอย่าง JSON
+
+sample_entry = create_json_entry(1,"ละเมิดสิทธิบัตรการประดิษฐ์")
+
+print(json.dumps(sample_entry, indent=4, ensure_ascii=False))
