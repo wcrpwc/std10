@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set "VIRTUAL_ENV=D:\nlp2026\venv_comp_law"
+set "VIRTUAL_ENV=C:\Users\nawat\Desktop\กพป.ศทส.ฯ\หลักสูตรนวัตกรรมปัญญาประดิษฐ์ 2569\อจ. ตั้ม\NLP2026\std10\venv_comp_law"
 
 if not defined PROMPT set PROMPT=$P$G
 
