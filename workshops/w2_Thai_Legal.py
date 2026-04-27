@@ -18,7 +18,7 @@ original = "จำเลย ละเมิด และ จำหน่าย �
 augmented = augment_legal_text(original)
 # print(f"---Data Augmentation---")
 # print(f"Original : {original}")
-# print(f"Augmented : {augmented}")
+# print(f"Augmented : {augmented}") sdf
 
 # 2. SMOTE with Fallback
 import numpy as np
