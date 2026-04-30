@@ -110,7 +110,7 @@ token_embeddings = np.random.randn(batch,seq_len,d_model)
 pe_encoder = SinusodalPositionEncoding(max_seq_len=10, d_model=d_model)
 pe_encoder.show(seq_len)
 x = token_embeddings + pe_encoder.pe[:seq_len]
-#Step3 : Multi Head Attention
+#Step3 : Multi Head Attention.
 mha = MultiHeadAttentionSimple(d_model=d_model, n_heads=n_heads)
 output, attn_weights = mha.forward(x)
 
